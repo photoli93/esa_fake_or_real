@@ -63,6 +63,7 @@ data/sample/.gitkeep
 # =========================
 # Python virtual environments
 # =========================
+.conda/
 venv/
 env/
 .env
