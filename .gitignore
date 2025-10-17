@@ -1,0 +1,74 @@
+# =========================
+# macOS
+# =========================
+.DS_Store
+.AppleDouble
+.LSOverride
+Icon?
+._*
+.Spotlight-V100
+.Trashes
+
+# =========================
+# Python
+# =========================
+__pycache__/
+*.py[cod]
+*$py.class
+
+# =========================
+# Jupyter notebooks
+# =========================
+.ipynb_checkpoints
+
+# =========================
+# Logs & temp files
+# =========================
+*.log
+*.tmp
+
+# =========================
+# Models & results
+# =========================
+models/
+results/
+checkpoints/
+*.h5
+*.pt
+*.ckpt
+*.pkl
+
+# =========================
+# Data
+# =========================
+data/raw/
+data/external/
+# Optional: track small example datasets
+data/sample/.gitkeep
+
+# =========================
+# Parquet / CSV (raw or intermediate)
+# =========================
+*.csv
+*.parquet
+
+# =========================
+# IDE / editors
+# =========================
+.vscode/
+.idea/
+*.swo
+*.swp
+
+# =========================
+# Python virtual environments
+# =========================
+venv/
+env/
+.env
+
+# =========================
+# HuggingFace / PyTorch cache
+# =========================
+~/.cache/huggingface/
+~/.cache/torch/
