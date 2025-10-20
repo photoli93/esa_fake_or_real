@@ -32,7 +32,9 @@ __pycache__/
 # =========================
 models/
 results/
+logs/
 checkpoints/
+outputs/
 *.h5
 *.pt
 *.ckpt
