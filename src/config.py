@@ -22,8 +22,6 @@ TEST_FILE = RAW_DATA_DIR / "test.csv"
 # Text processing
 MAX_SEQ_LENGTH = 512
 MIN_SEQ_LENGTH = 10
-# TEXT_COLUMN = "text"
-# LABEL_COLUMN = "label"
 
 # Tokenizer
 TOKENIZER_NAME = "distilbert-base-uncased"
