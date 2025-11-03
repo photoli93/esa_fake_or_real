@@ -49,7 +49,8 @@ def tokenize_data(df: pd.DataFrame, tokenizer: AutoTokenizer, max_length: int, t
         raise KeyError(f"Column '{text_column}' not found in the DataFrame")
 
     # Use the 'text_chunk' column containing the pre-chunked text strings
-    texts = df['text_chunk'].astype(str).tolist()
+    texts = df[text_column].astype(str).str.strip()
+    texts = texts[texts != ""].tolist()
 
     # Tokenize the texts. Return 'input_ids' and 'attention_mask'
     encodings = tokenizer(
@@ -129,11 +130,12 @@ if __name__ == "__main__":
 
     if test_df is not None:
         print(f"Tokenizing test data (Max Length: {max_len})...")
+        
         test_dataset = tokenize_data(test_df, tokenizer, max_len)
         
         # Save the tokenized dataset
         torch.save(test_dataset, TOKENIZED_TEST_PATH)
         print(f"Successfully created and saved tokenized test dataset to: {TOKENIZED_TEST_PATH}")
-        print(f"Dataset size: {len(test_dataset)}")
+        print(f"Dataset size: {test_dataset['input_ids'].shape[0]}")
 
     print("\nDatasets creation complete")
