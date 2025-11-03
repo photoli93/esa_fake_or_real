@@ -30,7 +30,7 @@ class TextPairDataset(Dataset):
         return len(self.labels)
 
 # Tokenization Function 
-def tokenize_data(df: pd.DataFrame, tokenizer: AutoTokenizer, max_length: int):
+def tokenize_data(df: pd.DataFrame, tokenizer: AutoTokenizer, max_length: int, text_column: str = "text_chunk", label_column: str = "label"):
     """
     Tokenizes the exploded DataFrame, which has one text chunk per row, 
     and prepares it for DistilBERT training.
@@ -44,8 +44,12 @@ def tokenize_data(df: pd.DataFrame, tokenizer: AutoTokenizer, max_length: int):
         A TextPairDataset object ready for use with a DataLoader
     """
 
+    # Ensure the text column exists
+    if text_column not in df.columns:
+        raise KeyError(f"Column '{text_column}' not found in the DataFrame")
+
     # Use the 'text_chunk' column containing the pre-chunked text strings
-    texts = df['text_chunk'].tolist()
+    texts = df['text_chunk'].astype(str).tolist()
 
     # Tokenize the texts. Return 'input_ids' and 'attention_mask'
     encodings = tokenizer(
@@ -56,18 +60,13 @@ def tokenize_data(df: pd.DataFrame, tokenizer: AutoTokenizer, max_length: int):
         return_tensors='pt' # Return PyTorch tensors
     )
 
-    # Use the 'label' column containing the binary 0/1 label
-    try:
-        labels = df['label'].tolist()
-    except KeyError:
-        raise KeyError(
-            "The 'label' column is missing from the DataFrame. "
-            "Please ensure you have created the binary label (0/1) in your "
-            "preprocessing notebook (02_data_preprocessing.ipynb) before saving the exploded CSVs."
-        )
-
-    # 4. Return the custom dataset object
-    return TextPairDataset(encodings, labels)
+    # If labels exist, return TextPairDataset
+    if label_column in df.columns:
+        labels = df[label_column].tolist()
+        return TextPairDataset(encodings, labels)
+    else:
+        # Test set: return only encodings
+        return encodings
 
 # Main
 if __name__ == "__main__":
@@ -76,9 +75,11 @@ if __name__ == "__main__":
     # Define file paths based on config
     TRAIN_CLEANED_FILE = config.PROCESSED_DATA_DIR / "train_exploded.csv"
     VAL_CLEANED_FILE = config.PROCESSED_DATA_DIR / "val_exploded.csv"
-    
+    TEST_CLEANED_FILE  = config.PROCESSED_DATA_DIR / "test_exploded.csv"
+
     TOKENIZED_TRAIN_PATH = config.PROCESSED_DATA_DIR / "tokenized_train.pt"
     TOKENIZED_VAL_PATH = config.PROCESSED_DATA_DIR / "tokenized_val.pt"
+    TOKENIZED_TEST_PATH  = config.PROCESSED_DATA_DIR / "tokenized_test.pt"
 
     # Instantiate Tokenizer
     print(f"Loading tokenizer: {config.TOKENIZER_NAME}")
@@ -118,4 +119,21 @@ if __name__ == "__main__":
         print(f"Successfully created and saved tokenized validation dataset to: {TOKENIZED_VAL_PATH}")
         print(f"Dataset size: {len(val_dataset)}")
     
+    # Process Test Data
+    print(f"\nLoading test data from: {TEST_CLEANED_FILE}")
+    try:
+        test_df = pd.read_csv(TEST_CLEANED_FILE)
+    except FileNotFoundError:
+        print(f"Warning: Test data not found at {TEST_CLEANED_FILE}. Skipping test tokenization.")
+        test_df = None
+
+    if test_df is not None:
+        print(f"Tokenizing test data (Max Length: {max_len})...")
+        test_dataset = tokenize_data(test_df, tokenizer, max_len)
+        
+        # Save the tokenized dataset
+        torch.save(test_dataset, TOKENIZED_TEST_PATH)
+        print(f"Successfully created and saved tokenized test dataset to: {TOKENIZED_TEST_PATH}")
+        print(f"Dataset size: {len(test_dataset)}")
+
     print("\nDatasets creation complete")
